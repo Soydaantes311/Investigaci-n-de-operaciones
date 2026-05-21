@@ -1,18 +1,20 @@
-import time
-import random
+import pulp
 
-def busqueda_lineal(lista, objetivo):
-    for i in range(len(lista)):
-        if lista[i] == objetivo:
-            return i
-    return -1
+model = pulp.LpProblem("Cloud_Optimization", pulp.LpMinimize)
 
-lista = list(range(1000))
-objetivo = random.randint(0, 999999)
+x1 = pulp.LpVariable("Instancia_A", lowBound=0, upBound=40, cat='Integer')
+x2 = pulp.LpVariable("Instancia_B", lowBound=0, upBound=30, cat='Integer')
 
-inicio = time.time()
-resultado = busqueda_lineal(lista, objetivo)
-fin = time.time()
+model += 10 * x1 + 30 * x2, "Costo_Total"
 
-print(f"Objetivo encontrado en el índice: {resultado}")
-print(f"Tiempo de ejecución: {fin - inicio:.6f} segundos")
+model += 2 * x1 + 4 * x2 >= 100, "CPU_Demand"
+model += 1 * x1 + 5 * x2 >= 80, "RAM_Demand"
+
+model.solve()
+
+print(f"Estado: {pulp.LpStatus[model.status]}")
+print(f"Contratar Tipo A: {x1.varValue}")
+print(f"Contratar Tipo B: {x2.varValue}")
+print(f"Costo Mínimo Diario: ${pulp.value(model.objective)}")
+
+#source .venv/bin/activate
